@@ -1,30 +1,39 @@
-#!/bin/bash
+#! /bin/bash
 
-# update package repos
-sudo apt-get update
+# disable swap
+sudo swapoff -a
+sudo sed -ri 's/.*swap.*/#&/' /etc/fstab
 
-# install additional helper packages
-sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+echo "Swap diasbled..."
 
-# add gpg key
-sudo bash -c "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -"
+# disable firewall
+sudo ufw disable
 
-# add apt sources to list
-sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-
-# update package repos again
-sudo apt-get update
-
-# install docker community edition
+# install dependencies
+sudo apt-get update -y
+sudo apt-get install -y apt-transport-https ca-certificates curl wget software-properties-common
+curl -fsSL https://mirrors.aliyun.com/docker-ce/linux/ubuntu/gpg | sudo apt-key add -
+sudo add-apt-repository "deb [arch=amd64] https://mirrors.aliyun.com/docker-ce/linux/ubuntu $(lsb_release -cs) stable"
+sudo apt-get update -y
 sudo apt-get install -y docker-ce
+
+echo "Dependencies installed..."
+
+# configure docker
+cat <<EOF | sudo tee /etc/docker/daemon.json
+{
+  "registry-mirrors": ["https://registry.cn-hangzhou.aliyuncs.com"],
+  "exec-opts":["native.cgroupdriver=systemd"]
+}
+EOF
+
+
+# start docker
+sudo systemctl enable docker
+sudo systemctl daemon-reload
+sudo systemctl restart docker
+
+echo "Docker installed and configured..."
 
 # allow execution of docker command without sudo
 sudo gpasswd -a $(whoami) docker
-
-# download docker-compose and make executable
-sudo curl -L https://github.com/docker/compose/releases/download/1.16.1/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
-sudo chmod +x /usr/local/bin/docker-compose
-
-# download docker-compose-wrapper and make executable
-sudo curl -L https://raw.githubusercontent.com/chrisipa/docker-compose-wrapper/master/docker-compose-wrapper -o /usr/local/bin/docker-compose-wrapper
-sudo chmod +x /usr/local/bin/docker-compose-wrapper

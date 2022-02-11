@@ -19,29 +19,29 @@ end
 
 # create virtual machine
 Vagrant.configure("2") do |config|
+  config.vm.box_check_update = false
 
   # set virtual machine image
-  config.vm.box = "ubuntu/trusty64"
-  config.vm.box_url = "https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box"
+  config.vm.box = "ubuntu/bionic64"
 
   # set provider
   config.vm.provider "virtualbox" do |v|
-    v.gui = true
+    v.gui = false
     v.name = "Docker Daemon"
-    v.memory = 1024
+    v.memory = 1024*6
     v.cpus = 1
-  end  
+  end
 
   # set hostname
   config.vm.hostname = "docker"
 
-  # use nat networking
-  config.vm.network "private_network", type: "dhcp"
+  config.vm.network "private_network", ip: "10.0.0.91"
 
   # execute shell scripts in vm
   config.vm.provision "shell", path: "bootstrap/inputrc.sh", privileged: true
   config.vm.provision "shell", path: "bootstrap/bashrc.sh", privileged: false
   config.vm.provision "shell", path: "bootstrap/docker.sh", privileged: false
   config.vm.provision "shell", path: "bootstrap/daemon.sh", privileged: true, env: {"HOST_IS_WINDOWS" => OS.windows?}
+  config.vm.provision "shell", path: "bootstrap/max_map_count.sh", privileged: true
 
 end
