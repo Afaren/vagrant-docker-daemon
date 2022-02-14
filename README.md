@@ -26,23 +26,11 @@ Vagrant box with Docker daemon accessible from a remote host. Very useful for Do
 
 # Use case examples
 
-## Windows
-
-* Set DOCKER_HOST environment variable (use ip which is logged out by vagrant up):
-  ```bash
-  set DOCKER_HOST=tcp://172.28.128.2:2375
-  ```  
-
-* Use [docker-maven-plugin](https://dmp.fabric8.io/) from [fabric8](https://fabric8.io/) to build your Docker images:
-  ```bash
-  mvn clean install docker:build
-  ```  
-
 ## Linux   
 
 * Set DOCKER_HOST environment variable (use ip which is logged out by vagrant up):
   ```bash
-  export DOCKER_HOST=tcp://172.28.128.2:2375
+  export DOCKER_HOST=tcp://10.0.0.91:2375
   ```  
 
 * Use docker command line to test some features with a fresh installation:  
