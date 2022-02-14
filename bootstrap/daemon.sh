@@ -1,7 +1,10 @@
 #!/bin/bash
 
+echo "make docker.service.d"
+mkdir -p /etc/systemd/system/docker.service.d
+
 # configuration
-dockerConfigFile="/etc/default/docker"
+dockerConfigFile="/etc/systemd/system/docker.service.d/options.conf"
 dockerDaemonPort="2375"
 
 # --------------------------------------------------------
@@ -22,12 +25,14 @@ function log() {
 }
 
 # allow connections to docker socket from the outside world
-echo '' >> "$dockerConfigFile"
-echo '# Allow connections to docker socket from the outside world' >> "$dockerConfigFile"
-echo 'DOCKER_OPTS="-H tcp://0.0.0.0:'$dockerDaemonPort' -H unix:///var/run/docker.sock"' >> "$dockerConfigFile"
+# solution from https://dockerlabs.collabnix.com/beginners/components/daemon/access-daemon-externally.html
+echo '[Service]'  >> "$dockerConfigFile"
+echo 'ExecStart=' >> "$dockerConfigFile"
+echo "ExecStart=/usr/bin/dockerd -H unix:// -H tcp://0.0.0.0:$dockerDaemonPort" >> "$dockerConfigFile"
 
 # restart docker daemon
-/etc/init.d/docker restart
+systemctl daemon-reload
+systemctl restart docker
 
 # get current ip address
 ipAddress="$(hostname -I | cut -d' ' -f2)"
